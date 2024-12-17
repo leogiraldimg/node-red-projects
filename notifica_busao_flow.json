@@ -1,0 +1,791 @@
+[
+    {
+        "id": "c54903559be3ab03",
+        "type": "tab",
+        "label": "Bot Notifica Busão",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "be1a33fadada5f6a",
+        "type": "http request",
+        "z": "c54903559be3ab03",
+        "name": "[post] /Login/Autenticar",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar?token=31bbbbaed73ec9e7c14892de96256cf876034f9e1f4af004dbc324a37bff4ebd",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 880,
+        "y": 420,
+        "wires": [
+            [
+                "1a3381db46f84274"
+            ]
+        ]
+    },
+    {
+        "id": "07d29930f7c62601",
+        "type": "http request",
+        "z": "c54903559be3ab03",
+        "name": "[get] /Linha/Buscar",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://api.olhovivo.sptrans.com.br/v2.1/Linha/Buscar?termosBusca={{{linha}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 870,
+        "y": 500,
+        "wires": [
+            [
+                "d190048354538c0c"
+            ]
+        ]
+    },
+    {
+        "id": "1a3381db46f84274",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "Configura cookie",
+        "func": "const cookie = msg.headers['set-cookie'][0];\nmsg.payload = {}\nmsg.headers = {}\nmsg.headers.Cookie = cookie;\nmsg.authCookie = cookie\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 500,
+        "wires": [
+            [
+                "07d29930f7c62601"
+            ]
+        ]
+    },
+    {
+        "id": "702f4a071c2fe69a",
+        "type": "http request",
+        "z": "c54903559be3ab03",
+        "name": "[get] /Posicao/Linha",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://api.olhovivo.sptrans.com.br/v2.1/Posicao/Linha?codigoLinha={{{codigoLinha}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 870,
+        "y": 580,
+        "wires": [
+            [
+                "c1f9ca431f2cf8ab"
+            ]
+        ]
+    },
+    {
+        "id": "6f5fd0d6830f2dbd",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "Configura cookie",
+        "func": "msg.payload = {}\nmsg.headers = {}\nmsg.headers.Cookie = msg.authCookie;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 580,
+        "wires": [
+            [
+                "702f4a071c2fe69a"
+            ]
+        ]
+    },
+    {
+        "id": "c1f9ca431f2cf8ab",
+        "type": "split",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload.vs",
+        "x": 1050,
+        "y": 580,
+        "wires": [
+            [
+                "d1f482fb716f8b16",
+                "3cd0c05c691ef60e"
+            ]
+        ]
+    },
+    {
+        "id": "4ffdc60f7118fc9d",
+        "type": "http request",
+        "z": "c54903559be3ab03",
+        "name": "[get] calcula distancia/tempo ao ponto",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://routing.openstreetmap.de/routed-car/route/v1/driving/{{{requesterLocation.longitude}}},{{{requesterLocation.latitude}}};{{{payload.vs.px}}},{{{payload.vs.py}}}?overview=false",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 710,
+        "y": 660,
+        "wires": [
+            [
+                "524d09ebb2da364f"
+            ]
+        ]
+    },
+    {
+        "id": "3b1ecc8c64aa68e2",
+        "type": "http request",
+        "z": "c54903559be3ab03",
+        "name": "[get] consulta endereço",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://geocode.maps.co/reverse?lat={{{payload.vs.py}}}&lon={{{payload.vs.px}}}&api_key=6720166276a92200818637kzr322061",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1470,
+        "y": 580,
+        "wires": [
+            [
+                "85584f033d833ae9"
+            ]
+        ]
+    },
+    {
+        "id": "ea764166c9cb611a",
+        "type": "change",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "osm",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 970,
+        "y": 740,
+        "wires": [
+            [
+                "83a9f15b06b56056"
+            ]
+        ]
+    },
+    {
+        "id": "0ee9b5f888960be3",
+        "type": "change",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "geocode",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1230,
+        "y": 740,
+        "wires": [
+            [
+                "83a9f15b06b56056"
+            ]
+        ]
+    },
+    {
+        "id": "83a9f15b06b56056",
+        "type": "join",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "20",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1170,
+        "y": 840,
+        "wires": [
+            [
+                "cc612593b39b6d20"
+            ]
+        ]
+    },
+    {
+        "id": "d1f482fb716f8b16",
+        "type": "delay",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "pauseType": "rate",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1.5",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1240,
+        "y": 580,
+        "wires": [
+            [
+                "3b1ecc8c64aa68e2"
+            ]
+        ]
+    },
+    {
+        "id": "85584f033d833ae9",
+        "type": "join",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "20",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "num",
+        "reduceFixup": "",
+        "x": 1670,
+        "y": 580,
+        "wires": [
+            [
+                "0ee9b5f888960be3"
+            ]
+        ]
+    },
+    {
+        "id": "48413bb4ff934e87",
+        "type": "telegram sender",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "bot": "b16222e2ff1addf0",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 2350,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a20bfdfe36bf31dc",
+        "type": "change",
+        "z": "c54903559be3ab03",
+        "name": "Configura resposta bot",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.chatId",
+                "pt": "msg",
+                "to": "1416281006",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload.type",
+                "pt": "msg",
+                "to": "message",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2080,
+        "y": 620,
+        "wires": [
+            [
+                "48413bb4ff934e87"
+            ]
+        ]
+    },
+    {
+        "id": "6ddcfd8a37ead0da",
+        "type": "template",
+        "z": "c54903559be3ab03",
+        "name": "Monta mensagem",
+        "field": "payload.content",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "{{ linha }}\n\n{{#payload.osm}}\n  {{#routes}}\nDistância do ônibus até você: {{legs.0.distance}} metros\nTempo estimado: {{legs.0.duration}} minutos\n    \n  {{/routes}}\n{{/payload.osm}}\n{{#payload.geocode}}\n{{ display_name }}\n  \n{{/payload.geocode}}\n",
+        "output": "str",
+        "x": 1510,
+        "y": 840,
+        "wires": [
+            [
+                "a20bfdfe36bf31dc"
+            ]
+        ]
+    },
+    {
+        "id": "524d09ebb2da364f",
+        "type": "join",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "3",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "num",
+        "reduceFixup": "",
+        "x": 950,
+        "y": 660,
+        "wires": [
+            [
+                "ea764166c9cb611a"
+            ]
+        ]
+    },
+    {
+        "id": "62b72f259ef726f4",
+        "type": "telegram receiver",
+        "z": "c54903559be3ab03",
+        "name": "Recebe mensagem",
+        "bot": "b16222e2ff1addf0",
+        "saveDataDir": "",
+        "filterCommands": false,
+        "x": 650,
+        "y": 220,
+        "wires": [
+            [
+                "92a5aacec4ea3807"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "85178ed6a204aa0d",
+        "type": "change",
+        "z": "c54903559be3ab03",
+        "name": "Define msg.linha",
+        "rules": [
+            {
+                "t": "set",
+                "p": "linha",
+                "pt": "msg",
+                "to": "payload.content",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "chatId",
+                "pt": "msg",
+                "to": "payload.chatId",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 650,
+        "y": 420,
+        "wires": [
+            [
+                "be1a33fadada5f6a"
+            ]
+        ]
+    },
+    {
+        "id": "5ac32624ba95d1f6",
+        "type": "catch",
+        "z": "c54903559be3ab03",
+        "name": "Captura erro",
+        "scope": null,
+        "uncaught": true,
+        "x": 1110,
+        "y": 920,
+        "wires": [
+            [
+                "c6aede86b180a524"
+            ]
+        ]
+    },
+    {
+        "id": "c6aede86b180a524",
+        "type": "template",
+        "z": "c54903559be3ab03",
+        "name": "Monta mensagem de erro",
+        "field": "payload.content",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Falha ao consultar linha. Tente novamente mais tarde!",
+        "output": "str",
+        "x": 1490,
+        "y": 920,
+        "wires": [
+            [
+                "a20bfdfe36bf31dc"
+            ]
+        ]
+    },
+    {
+        "id": "f7faa17c0c401bb4",
+        "type": "template",
+        "z": "c54903559be3ab03",
+        "name": "Monta mensagem de erro",
+        "field": "payload.content",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Linha fornecida não existe! Forneça uma linha de ônibus válida!",
+        "output": "str",
+        "x": 1310,
+        "y": 440,
+        "wires": [
+            [
+                "a20bfdfe36bf31dc"
+            ]
+        ]
+    },
+    {
+        "id": "a8379a277017ac8b",
+        "type": "change",
+        "z": "c54903559be3ab03",
+        "name": "Captura código linha",
+        "rules": [
+            {
+                "t": "set",
+                "p": "codigoLinha",
+                "pt": "msg",
+                "to": "payload[0].cl",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1300,
+        "y": 500,
+        "wires": [
+            [
+                "6f5fd0d6830f2dbd"
+            ]
+        ]
+    },
+    {
+        "id": "d190048354538c0c",
+        "type": "switch",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "empty"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1070,
+        "y": 500,
+        "wires": [
+            [
+                "f7faa17c0c401bb4"
+            ],
+            [
+                "a8379a277017ac8b"
+            ]
+        ]
+    },
+    {
+        "id": "92a5aacec4ea3807",
+        "type": "switch",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "property": "payload.type",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "location",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "message",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 890,
+        "y": 220,
+        "wires": [
+            [
+                "682356de4d599302"
+            ],
+            [
+                "e8bf8e943be2dcef"
+            ]
+        ]
+    },
+    {
+        "id": "682356de4d599302",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "Armazena localização",
+        "func": "if (!flow.get(\"location\")) {\n    flow.set(\"location\", {});\n}\n\nflow.set(\"location\", {...flow.get(\"location\"), [msg.payload.chatId]: msg.payload.content});\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 180,
+        "wires": [
+            [
+                "9f7403774f81eb2c"
+            ]
+        ]
+    },
+    {
+        "id": "9f7403774f81eb2c",
+        "type": "template",
+        "z": "c54903559be3ab03",
+        "name": "Monta mensagem",
+        "field": "payload.content",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Localização compartilhada com sucesso!\n\nAgora, busque pelo identificador da linha de ônibus.",
+        "output": "str",
+        "x": 1490,
+        "y": 180,
+        "wires": [
+            [
+                "a20bfdfe36bf31dc"
+            ]
+        ]
+    },
+    {
+        "id": "e3ba130ecac44438",
+        "type": "switch",
+        "z": "c54903559be3ab03",
+        "name": "",
+        "property": "hasLocation",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1290,
+        "y": 280,
+        "wires": [
+            [
+                "9ae8be34db0599b9"
+            ],
+            [
+                "85178ed6a204aa0d"
+            ]
+        ]
+    },
+    {
+        "id": "9ae8be34db0599b9",
+        "type": "template",
+        "z": "c54903559be3ab03",
+        "name": "Monta mensagem",
+        "field": "payload.content",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Antes de consultar as linhas de ônibus, envie sua localização!",
+        "output": "str",
+        "x": 1490,
+        "y": 260,
+        "wires": [
+            [
+                "a20bfdfe36bf31dc"
+            ]
+        ]
+    },
+    {
+        "id": "e8bf8e943be2dcef",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "Valida localização",
+        "func": "msg.hasLocation = false;\n\nconst location = flow.get(\"location\");\n\nif (location && location[msg.payload.chatId]) {\n    msg.hasLocation = true;\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 280,
+        "wires": [
+            [
+                "e3ba130ecac44438"
+            ]
+        ]
+    },
+    {
+        "id": "3cd0c05c691ef60e",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "Captura localização",
+        "func": "msg.requesterLocation = flow.get(\"location\")[msg.chatId];\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 660,
+        "wires": [
+            [
+                "4ffdc60f7118fc9d"
+            ]
+        ]
+    },
+    {
+        "id": "cc612593b39b6d20",
+        "type": "function",
+        "z": "c54903559be3ab03",
+        "name": "function 1",
+        "func": "for (const osm of msg.payload.osm) {\n    for (const route of osm.routes) {\n        for (const leg of route.legs) {\n            leg.duration = (leg.duration / 60).toFixed(1)\n        }\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1320,
+        "y": 840,
+        "wires": [
+            [
+                "6ddcfd8a37ead0da"
+            ]
+        ]
+    },
+    {
+        "id": "b16222e2ff1addf0",
+        "type": "telegram bot",
+        "botname": "notifica_busao_bot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "addressfamily": "",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    }
+]
